@@ -1,83 +1,126 @@
-# Multi-Container Runtime
+# Supervised Multi-Container Runtime
 
 ## Operating Systems Project – OS Jackfruit
 
 ## Overview
 
-This project implements a lightweight container runtime inspired by modern container systems such as Docker. It enables the creation, execution, and management of isolated containers using Linux kernel primitives such as namespaces and process control mechanisms.
+This project implements a lightweight container runtime inspired by modern container systems. It enables creation, execution, and management of isolated containers using Linux system calls and namespaces.
 
-The system integrates both user-space and kernel-space components to demonstrate key operating system concepts including process isolation, inter-process communication, and resource monitoring.
+The system integrates user-space and kernel-space components to demonstrate core operating system concepts such as process isolation, inter-process communication, and kernel monitoring.
 
 ## Key Features
 
-* Lightweight container runtime using `clone()`
-* Process isolation using Linux namespaces (PID and mount)
+* Container creation using `clone()`
+* Namespace-based isolation (PID, mount)
 * Multi-container support
 * Supervisor-client architecture using UNIX domain sockets
-* Logging system for container execution
+* Logging system for container output
 * Kernel module for monitoring memory usage
-* Soft and hard memory limit enforcement
+* Soft and hard memory limits enforcement
 
 ## System Architecture
 
 ### User-Space Runtime (Engine)
 
-* Handles container lifecycle (`run`, `ps`, `logs`, `stop`)
-* Communicates with supervisor via UNIX socket (`/tmp/mini_runtime.sock`)
-* Uses `clone()` to create isolated containers
+* Manages container lifecycle (`run`, `ps`, `logs`, `stop`)
+* Communicates with supervisor via UNIX socket
+* Uses `clone()` for container creation
 
 ### Supervisor
 
-* Central controller for container management
-* Maintains container state and metadata
-* Handles client requests from engine commands
+* Central control process
+* Maintains container state
+* Handles client requests
 
 ### Kernel Module (monitor.ko)
 
-* Tracks memory usage of containers
-* Enforces soft and hard limits
+* Tracks container memory usage
 * Logs events using `printk`
-* Communicates with user-space using `ioctl`
+* Communicates via `ioctl`
 
 ## Implementation Tasks
 
-### Task 1: Basic Execution
+### Task 1 – Basic Execution
 
-Implemented process execution using `fork()` and `execvp()`.
+Demonstrates execution of a program inside the container runtime.
 
-### Task 2: Container Isolation
-
-Used `clone()` with namespace flags:
-
-* `CLONE_NEWPID`
-* `CLONE_NEWNS`
-
-### Task 3: Multi-Container Support
-
-Enabled execution and management of multiple containers.
-
-### Task 4: Logging System
-
-Container outputs can be accessed using:
+**Command:**
 
 ```
-./engine logs <container_id>
+sudo ./engine run c80 / /home/yashita-anand/OS-Jackfruit/boilerplate/cpu_hog
 ```
 
-### Task 5: Kernel Monitoring
+**Observation:**
+The container executes successfully and exits with status 0.
 
-Kernel module monitors:
 
-* Memory usage
-* Soft and hard limits
-* Logs through `dmesg`
+### Task 2 – Container Isolation
 
-### Task 6: Supervisor System
+Demonstrates process isolation using Linux namespaces and the `clone()` system call.
 
-Implemented control plane using:
+**Observation:**
+Containers run independently without affecting the host system.
 
-* UNIX domain sockets
-* Client-server communication model
+
+### Task 3 – Multi-Container Runtime
+
+Demonstrates support for multiple containers using unique container IDs.
+
+**Commands:**
+
+```
+sudo ./engine run c210 / /home/yashita-anand/OS-Jackfruit/boilerplate/cpu_hog
+sudo ./engine run c211 / /home/yashita-anand/OS-Jackfruit/boilerplate/cpu_hog
+```
+
+**Observation:**
+Multiple containers execute independently.
+
+
+### Task 4 – Logging System
+
+Demonstrates storage and retrieval of container output logs.
+
+**Commands:**
+
+```
+sudo ./engine run c300 / /home/yashita-anand/OS-Jackfruit/boilerplate/cpu_hog
+sudo ./engine logs c300
+```
+
+**Observation:**
+Container output is stored in log files and retrieved successfully.
+
+
+### Task 5 – Kernel Monitoring
+
+Demonstrates kernel-level monitoring using a custom kernel module.
+
+**Commands:**
+
+```
+sudo insmod monitor.ko
+sudo ./engine run c400 / /home/yashita-anand/OS-Jackfruit/boilerplate/memory_hog
+sudo dmesg | tail
+```
+
+**Observation:**
+Kernel logs show container registration and monitoring details.
+
+
+### Task 6 – Supervisor and Control Plane
+
+Demonstrates supervisor-based control of container execution.
+
+**Command:**
+
+```
+sudo ./engine supervisor /
+```
+
+**Observation:**
+Supervisor manages container lifecycle through a UNIX socket.
+
 
 ## How to Run
 
@@ -96,43 +139,53 @@ sudo insmod monitor.ko
 ### Start Supervisor
 
 ```
-sudo ./engine supervisor rootfs-alpha
+sudo ./engine supervisor /
 ```
 
-### Run Containers
+### Run Container
 
 ```
-sudo ./engine run c1 rootfs-alpha ./cpu_hog
-sudo ./engine run c2 rootfs-alpha ./memory_hog
+sudo ./engine run <id> / <program>
 ```
 
-## Observations
-
-* CPU-intensive workloads (`cpu_hog`) do not trigger memory monitoring events
-* Memory-intensive workloads (`memory_hog`) generate kernel logs
-* Containers terminate quickly, so `engine ps` may appear empty
-
-## Sample Outputs
-
-* `engine ps` shows active containers
-* `engine logs <id>` shows logs
-* `dmesg | tail` shows kernel monitoring output
-
-## Design Decisions
-
-* Used `clone()` instead of `fork()` for namespace isolation
-* Implemented supervisor-client architecture for scalability
-* Used kernel module for accurate monitoring
+---
 
 ## Screenshots
 
-* Container execution
-* engine ps output
-* dmesg output
-* logs
+### Task 1 – Basic Execution
+
+(Add screenshot here)
+
+### Task 2 – Container Isolation
+
+(Add screenshot here)
+
+### Task 3 – Multi-Container Runtime
+
+(Add screenshot here)
+
+### Task 4 – Logging System
+
+(Add screenshot here)
+
+### Task 5 – Kernel Monitoring
+
+(Add screenshot here)
+
+### Task 6 – Supervisor
+
+(Add screenshot here)
+
+
+## Design Decisions
+
+* Used `clone()` instead of `fork()` to enable namespace isolation
+* Implemented supervisor-client architecture for modularity
+* Integrated kernel module for low-level monitoring
+
 
 ## Conclusion
 
-This project demonstrates core operating system concepts such as process isolation, kernel-user communication, and container runtime design.
+This project demonstrates key operating system concepts such as process isolation, container runtime design, kernel-user communication, and resource monitoring. It provides a simplified understanding of how container technologies like Docker function internally.
 
 
