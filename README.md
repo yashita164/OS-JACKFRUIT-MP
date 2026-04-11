@@ -126,8 +126,6 @@ sudo ./engine run c2 rootfs-alpha ./memory_hog
 
 ## Screenshots
 
-Add screenshots of:
-
 * Container execution
 * engine ps output
 * dmesg output
@@ -137,7 +135,4 @@ Add screenshots of:
 
 This project demonstrates core operating system concepts such as process isolation, kernel-user communication, and container runtime design.
 
-## Author
 
-Yashita Anand
-https://github.com/yashita164
