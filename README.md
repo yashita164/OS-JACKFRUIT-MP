@@ -1,111 +1,143 @@
-# Multi-Container Runtime
+# Supervised Multi-Container Runtime
 
-A lightweight Linux container runtime in C with a long-running supervisor and a kernel-space memory monitor.
+## Operating Systems Project – OS Jackfruit
 
-Read [`project-guide.md`](project-guide.md) for the full project specification.
+## Overview
 
----
+This project implements a lightweight container runtime inspired by modern container systems such as Docker. It enables the creation, execution, and management of isolated containers using Linux kernel primitives such as namespaces and process control mechanisms.
 
-## Getting Started
+The system integrates both user-space and kernel-space components to demonstrate key operating system concepts including process isolation, inter-process communication, and resource monitoring.
 
-### 1. Fork the Repository
+## Key Features
 
-1. Go to [github.com/shivangjhalani/OS-Jackfruit](https://github.com/shivangjhalani/OS-Jackfruit)
-2. Click **Fork** (top-right)
-3. Clone your fork:
+* Lightweight container runtime using `clone()`
+* Process isolation using Linux namespaces (PID and mount)
+* Multi-container support
+* Supervisor-client architecture using UNIX domain sockets
+* Logging system for container execution
+* Kernel module for monitoring memory usage
+* Soft and hard memory limit enforcement
 
-```bash
-git clone https://github.com/<your-username>/OS-Jackfruit.git
-cd OS-Jackfruit
+## System Architecture
+
+### User-Space Runtime (Engine)
+
+* Handles container lifecycle (`run`, `ps`, `logs`, `stop`)
+* Communicates with supervisor via UNIX socket (`/tmp/mini_runtime.sock`)
+* Uses `clone()` to create isolated containers
+
+### Supervisor
+
+* Central controller for container management
+* Maintains container state and metadata
+* Handles client requests from engine commands
+
+### Kernel Module (monitor.ko)
+
+* Tracks memory usage of containers
+* Enforces soft and hard limits
+* Logs events using `printk`
+* Communicates with user-space using `ioctl`
+
+## Implementation Tasks
+
+### Task 1: Basic Execution
+
+Implemented process execution using `fork()` and `execvp()`.
+
+### Task 2: Container Isolation
+
+Used `clone()` with namespace flags:
+
+* `CLONE_NEWPID`
+* `CLONE_NEWNS`
+
+### Task 3: Multi-Container Support
+
+Enabled execution and management of multiple containers.
+
+### Task 4: Logging System
+
+Container outputs can be accessed using:
+
+```
+./engine logs <container_id>
 ```
 
-### 2. Set Up Your VM
+### Task 5: Kernel Monitoring
 
-You need an **Ubuntu 22.04 or 24.04** VM with **Secure Boot OFF**. WSL will not work.
+Kernel module monitors:
 
-Install dependencies:
+* Memory usage
+* Soft and hard limits
+* Logs through `dmesg`
 
-```bash
-sudo apt update
-sudo apt install -y build-essential linux-headers-$(uname -r)
+### Task 6: Supervisor System
+
+Implemented control plane using:
+
+* UNIX domain sockets
+* Client-server communication model
+
+## How to Run
+
+### Build
+
 ```
-
-### 3. Run the Environment Check
-
-```bash
-cd boilerplate
-chmod +x environment-check.sh
-sudo ./environment-check.sh
-```
-
-Fix any issues reported before moving on.
-
-### 4. Prepare the Root Filesystem
-
-```bash
-mkdir rootfs-base
-wget https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.3-x86_64.tar.gz
-tar -xzf alpine-minirootfs-3.20.3-x86_64.tar.gz -C rootfs-base
-
-# Make one writable copy per container you plan to run
-cp -a ./rootfs-base ./rootfs-alpha
-cp -a ./rootfs-base ./rootfs-beta
-```
-
-Do not commit `rootfs-base/` or `rootfs-*` directories to your repository.
-
-### 5. Understand the Boilerplate
-
-The `boilerplate/` folder contains starter files:
-
-| File                   | Purpose                                             |
-| ---------------------- | --------------------------------------------------- |
-| `engine.c`             | User-space runtime and supervisor skeleton          |
-| `monitor.c`            | Kernel module skeleton                              |
-| `monitor_ioctl.h`      | Shared ioctl command definitions                    |
-| `Makefile`             | Build targets for both user-space and kernel module |
-| `cpu_hog.c`            | CPU-bound test workload                             |
-| `io_pulse.c`           | I/O-bound test workload                             |
-| `memory_hog.c`         | Memory-consuming test workload                      |
-| `environment-check.sh` | VM environment preflight check                      |
-
-Use these as your starting point. You are free to restructure the repository however you want — the submission requirements are listed in the project guide.
-
-### 6. Build and Verify
-
-```bash
-cd boilerplate
 make
 ```
 
-If this compiles without errors, your environment is ready.
+### Load Kernel Module
 
-### 7. GitHub Actions Smoke Check
-
-Your fork will inherit a minimal GitHub Actions workflow from this repository.
-
-That workflow only performs CI-safe checks:
-
-- `make -C boilerplate ci`
-- user-space binary compilation (`engine`, `memory_hog`, `cpu_hog`, `io_pulse`)
-- `./boilerplate/engine` with no arguments must print usage and exit with a non-zero status
-
-The CI-safe build command is:
-
-```bash
-make -C boilerplate ci
+```
+sudo insmod monitor.ko
 ```
 
-This smoke check does not test kernel-module loading, supervisor runtime behavior, or container execution.
+### Start Supervisor
 
----
+```
+sudo ./engine supervisor rootfs-alpha
+```
 
-## What to Do Next
+### Run Containers
 
-Read [`project-guide.md`](project-guide.md) end to end. It contains:
+```
+sudo ./engine run c1 rootfs-alpha ./cpu_hog
+sudo ./engine run c2 rootfs-alpha ./memory_hog
+```
 
-- The six implementation tasks (multi-container runtime, CLI, logging, kernel monitor, scheduling experiments, cleanup)
-- The engineering analysis you must write
-- The exact submission requirements, including what your `README.md` must contain (screenshots, analysis, design decisions)
+## Observations
 
-Your fork's `README.md` should be replaced with your own project documentation as described in the submission package section of the project guide. (As in get rid of all the above content and replace with your README.md)
+* CPU-intensive workloads (`cpu_hog`) do not trigger memory monitoring events
+* Memory-intensive workloads (`memory_hog`) generate kernel logs
+* Containers terminate quickly, so `engine ps` may appear empty
+
+## Sample Outputs
+
+* `engine ps` shows active containers
+* `engine logs <id>` shows logs
+* `dmesg | tail` shows kernel monitoring output
+
+## Design Decisions
+
+* Used `clone()` instead of `fork()` for namespace isolation
+* Implemented supervisor-client architecture for scalability
+* Used kernel module for accurate monitoring
+
+## Screenshots
+
+Add screenshots of:
+
+* Container execution
+* engine ps output
+* dmesg output
+* logs
+
+## Conclusion
+
+This project demonstrates core operating system concepts such as process isolation, kernel-user communication, and container runtime design.
+
+## Author
+
+Yashita Anand
+https://github.com/yashita164
