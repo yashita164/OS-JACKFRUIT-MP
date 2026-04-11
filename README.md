@@ -1,4 +1,4 @@
-# Supervised Multi-Container Runtime
+# Multi-Container Runtime
 
 ## Operating Systems Project – OS Jackfruit
 
