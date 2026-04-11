@@ -563,8 +563,30 @@ int main(int argc, char *argv[])
     if (strcmp(argv[1], "start") == 0)
         return cmd_start(argc, argv);
 
-    if (strcmp(argv[1], "run") == 0)
-        return cmd_run(argc, argv);
+    if (strcmp(argv[1], "run") == 0) {
+
+    if (argc < 5) {
+        fprintf(stderr, "Usage: ./engine run <id> <rootfs> <cmd>\n");
+        return 1;
+    }
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        // child process
+        execvp(argv[4], &argv[4]);
+        perror("exec failed");
+        exit(1);
+    } else if (pid > 0) {
+        // parent process
+        wait(NULL);
+    } else {
+        perror("fork failed");
+        return 1;
+    }
+
+    return 0;
+}
 
     if (strcmp(argv[1], "ps") == 0)
         return cmd_ps();
