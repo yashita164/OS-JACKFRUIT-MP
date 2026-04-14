@@ -25,9 +25,6 @@
 - **Task 7 – Scheduling Experiment**  
   Designed and executed experiments with multiple containers to analyze Linux scheduling behavior and CPU sharing.  
 
-- **Task 8 – Resource Cleanup**  
-  Ensured proper cleanup of processes, threads, and kernel structures, preventing zombie processes and resource leaks.  
-
 ---
 
 ### **Vismaya Harish**  
@@ -43,6 +40,8 @@
 - **Task 5 – Soft Limit Monitoring**  
   Implemented kernel module functionality for monitoring container memory usage.
 
+- **Task 8 – Resource Cleanup**  
+  Ensured proper cleanup of processes, threads, and kernel structures, preventing zombie processes and resource leaks.  
   ## 2. Overview  
 
 This project implements a lightweight container runtime inspired by modern container systems. It enables the creation, execution, and management of isolated containers using Linux system calls and namespaces.  
