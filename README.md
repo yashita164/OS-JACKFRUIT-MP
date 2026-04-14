@@ -1,34 +1,39 @@
 ## Multi-Container Runtime
 Operating Systems Project – OS Jackfruit
-
 ## 1. Team Information
-1.Yashita Anand
-Task 1 – Multi-Container Supervision:
-Implemented support for running multiple containers under a single supervisor process. Ensured proper namespace isolation and container lifecycle handling.
-Task 4 – CLI and IPC Mechanism:
-Developed the command-line interface and implemented communication between CLI and supervisor using IPC (UNIX domain sockets).
-Task 6 – Hard Limit Enforcement:
-Integrated kernel monitoring with the runtime and ensured containers are tracked with memory limits. Demonstrated enforcement pipeline through kernel logs.
-Task 7 – Scheduling Experiment:
-Designed and executed experiments with multiple containers to analyze Linux scheduling behavior and CPU sharing.
-Task 8 – Resource Cleanup:
-Ensured proper cleanup of processes, threads, and kernel structures, preventing zombie processes and resource leaks.
+Team Members and Contributions
+Yashita Anand
 
-2.Vismaya Harish – Tasks 2, 3, 5
+Assigned Tasks: Task 1, Task 4, Task 6
+
 Contributions:
 
-Task 2 – Metadata Tracking:
-Implemented container state tracking and developed the engine ps command to display container metadata such as PID, state, and limits.
-Task 3 – Bounded-Buffer Logging:
-Designed and implemented a logging system using pipes and a bounded-buffer producer-consumer model to safely capture container output.
-Task 5 – Soft Limit Monitoring:
-Developed kernel module functionality for monitoring container memory usage and logging soft-limit events.
+Task 1 – Multi-Container Supervision
+Implemented execution of multiple containers under a single supervisor process and ensured correct lifecycle handling.
+Task 4 – CLI and IPC Mechanism
+Developed CLI commands and implemented communication between CLI and supervisor using UNIX domain sockets.
+Task 6 – Hard Limit Enforcement
+Integrated kernel monitoring with the runtime and demonstrated memory limit tracking through kernel logs.
+Vismaya Harish
 
+Assigned Tasks: Task 2, Task 3, Task 5
+
+Contributions:
+
+Task 2 – Metadata Tracking
+Implemented container metadata tracking and developed the engine ps command.
+Task 3 – Bounded-Buffer Logging
+Designed a logging pipeline using pipes and a producer-consumer model.
+Task 5 – Soft Limit Monitoring
+Implemented kernel module functionality for monitoring container memory usage.
+Joint Contributions
+Task 7 – Scheduling Experiment
+Task 8 – Clean Teardown
 ## 2. Overview
 
 This project implements a lightweight container runtime inspired by modern container systems. It enables creation, execution, and management of isolated containers using Linux system calls and namespaces.
 
-The system integrates both user-space and kernel-space components to demonstrate core operating system concepts such as process isolation, inter-process communication, memory monitoring, and scheduling behavior.
+The system integrates user-space and kernel-space components to demonstrate core operating system concepts such as process isolation, inter-process communication, memory monitoring, and scheduling behavior.
 
 ## 3. Key Features
 Container creation using clone()
@@ -39,143 +44,108 @@ Bounded-buffer logging system
 Kernel module for memory monitoring
 Soft and hard memory limit tracking
 Scheduling experiment support
-
 ## 4. System Architecture
-## User-Space Runtime (engine.c)
-Manages container lifecycle (start, run, ps, logs, stop)
-Communicates with supervisor using UNIX domain sockets
+User-Space Runtime (engine.c)
+Manages container lifecycle (run, ps, logs, stop)
 Uses clone() for container creation
-Maintains metadata for each container
-## Supervisor
-Long-running control process
-Handles all container requests
-Tracks container state and lifecycle
-Implements IPC communication with CLI
-## Kernel Module (monitor.c)
+Communicates with supervisor using UNIX sockets
+Supervisor
+Central control process
+Maintains container metadata
+Handles client requests
+Kernel Module (monitor.ko)
 Tracks container memory usage
 Logs events using printk
-Supports soft and hard memory limits
-Communicates with user space using ioctl
-
+Communicates using ioctl
 ## 5. Build, Load, and Run Instructions
-## Build
+1. Fork the Repository
+Go to the original repository
+Click Fork
+Clone your fork:
+git clone https://github.com/<your-username>/OS-Jackfruit.git
+cd OS-Jackfruit
+2. Set Up the Environment
+
+Install dependencies:
+
+sudo apt update
+sudo apt install -y build-essential linux-headers-$(uname -r)
+3. Run Environment Check
+cd boilerplate
+chmod +x environment-check.sh
+sudo ./environment-check.sh
+4. Build the Project
 make
-## Load Kernel Module
+5. Load Kernel Module
 sudo insmod monitor.ko
 
 Verify:
 
 ls -l /dev/container_monitor
-## Start Supervisor
+6. Start Supervisor
 sudo ./engine supervisor ./rootfs-base
-## Prepare Root Filesystems
+7. Prepare Root Filesystems
 cp -a ./rootfs-base ./rootfs-alpha
 cp -a ./rootfs-base ./rootfs-beta
-## Run Containers
+8. Run Containers
 sudo ./engine start alpha ./rootfs-alpha /bin/sh --soft-mib 40 --hard-mib 64
 sudo ./engine start beta ./rootfs-beta /bin/sh --soft-mib 40 --hard-mib 64
-## Run Foreground Container
+9. Run Foreground Container
 sudo ./engine run gamma ./rootfs-alpha /cpu_hog
-## View Containers
+10. View Containers
 sudo ./engine ps
-## View Logs
+11. View Logs
 sudo ./engine logs alpha
-## Stop Containers
+12. Stop Containers
 sudo ./engine stop alpha
 sudo ./engine stop beta
-## Check Kernel Logs
+13. Check Kernel Logs
 sudo dmesg | tail
-## Unload Module
+14. Unload Module
 sudo rmmod monitor
-
 ## 6. Demo with Screenshots
-## Task 1 – Multi-Container Supervision (Yashita Anand)
-
-Multiple containers are executed under a single supervisor, demonstrating concurrent execution and container management.
-
-## Task 2 – Metadata Tracking (Vismaya Harish)
-
-The engine ps command displays container metadata including ID, PID, state, and memory limits.
-
-## Task 3 – Bounded-Buffer Logging (Vismaya Harish)
-
-Container output is captured using pipes and stored in log files via a bounded-buffer logging system.
-
-## Task 4 – CLI and IPC (Yashita Anand)
-
-CLI commands communicate with the supervisor via IPC, demonstrating control-plane interaction.
-
-## Task 5 – Soft Limit Monitoring (Vismaya Harish)
-
-Kernel logs show container registration and configured soft/hard limits, demonstrating monitoring functionality.
-
-## Task 6 – Hard Limit Enforcement (Yashita Anand)
-
-The kernel module tracks containers and applies memory limits. The logs demonstrate the enforcement pipeline.
-
-## Task 7 – Scheduling Experiment
-
-Multiple containers are executed simultaneously to observe scheduling behavior and CPU sharing.
-
-## Task 8 – Clean Teardown
-
-Supervisor exits cleanly and no container processes remain, demonstrating proper cleanup.
-
+Task 1 – Multi-Container Supervision (Yashita Anand)
+(Add Screenshot: Screenshots/Task1.png)
+Task 2 – Metadata Tracking (Vismaya Harish)
+(Add Screenshot: Screenshots/Task2.png)
+Task 3 – Logging System (Vismaya Harish)
+(Add Screenshot: Screenshots/Task3.png)
+Task 4 – CLI and IPC (Yashita Anand)
+(Add Screenshot: Screenshots/Task4.png)
+Task 5 – Kernel Monitoring (Vismaya Harish)
+(Add Screenshot: Screenshots/Task5.png)
+Task 6 – Memory Limit Enforcement (Yashita Anand)
+(Add Screenshot: Screenshots/Task6.png)
+Task 7 – Scheduling Experiment
+(Add Screenshot: Screenshots/Task7.png)
+Task 8 – Clean Teardown
+(Add Screenshot: Screenshots/Task8.png)
 ## 7. Engineering Analysis
-## Isolation Mechanisms
+Isolation Mechanisms
 
-The runtime uses Linux namespaces (PID, UTS, mount) to isolate containers. Each container runs in its own namespace, ensuring independent process trees and system views. Filesystem isolation is achieved using chroot, restricting the container’s root directory. However, all containers share the same underlying kernel.
+Uses Linux namespaces (PID, mount, UTS) to isolate containers. Filesystem isolation is implemented using chroot.
 
-## Supervisor and Process Lifecycle
+Supervisor and Lifecycle Management
 
-A long-running supervisor manages container creation and termination. It tracks metadata, handles signals, and ensures child processes are reaped correctly, preventing zombie processes.
+A central supervisor manages container execution and ensures proper cleanup of processes.
 
-## IPC, Threads, and Synchronization
+IPC and Synchronization
 
-Two IPC mechanisms are used:
+Uses UNIX sockets for CLI communication and pipes for logging. Synchronization is handled using producer-consumer logic.
 
-UNIX domain sockets for CLI communication
-Pipes for logging
+Memory Management
 
-A bounded-buffer logging system ensures safe producer-consumer synchronization, preventing race conditions and data loss.
+Soft and hard memory limits are tracked using a kernel module. RSS is used for memory measurement.
 
-## Memory Management and Enforcement
+Scheduling Behavior
 
-RSS (Resident Set Size) measures physical memory usage. Soft limits act as warning thresholds, while hard limits define maximum usage. Monitoring is implemented in kernel space for accurate tracking.
-
-## Scheduling Behavior
-
-Running multiple CPU-bound containers demonstrates Linux scheduling. CPU time is shared fairly between containers, showing how the scheduler balances performance and fairness.
+Multiple containers share CPU resources, demonstrating fairness of the Linux scheduler.
 
 ## 8. Design Decisions and Tradeoffs
-## Namespace Isolation
-Used chroot with namespaces
-Simpler implementation
-Tradeoff: less secure than pivot_root
-## Supervisor Architecture
-Centralized supervisor process
-Easier lifecycle management
-Tradeoff: single control point
-## Logging System
-Bounded-buffer design
-Prevents data loss
-Tradeoff: added complexity
-## Kernel Monitoring
-Implemented as kernel module
-Accurate tracking
-Tradeoff: kernel-level complexity
-## Scheduling Experiment
-Used CPU-bound workloads
-Clearly demonstrates scheduling
-Tradeoff: limited workload diversity
-## 9. Scheduler Experiment Results
-Container	Workload	Observation
-c1000	CPU-bound	High CPU usage
-c1001	CPU-bound	Shares CPU time
-## Analysis
-Containers execute concurrently
-CPU is shared between processes
-Demonstrates fairness of Linux scheduler
+Used clone() instead of fork() for namespace support
+Used chroot instead of pivot_root for simplicity
+Implemented kernel module for accurate monitoring
+Used bounded-buffer logging for safe concurrency
+## 9. Conclusion
 
-## 10. Conclusion
-This project demonstrates key operating system concepts including container runtime design, process isolation, kernel-user communication, and scheduling behavior. It provides insight into how modern container systems like Docker operate internally.
+This project demonstrates container runtime design, process isolation, kernel-user communication, and scheduling behavior. It provides insight into how container systems such as Docker operate internally.
