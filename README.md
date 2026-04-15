@@ -156,34 +156,64 @@ sudo dmesg | tail
 ```bash
 sudo rmmod monitor
 ```
+---
+
+ 
+## Demo with Screenshots
+
+### Task 1 – Multi-Container Supervision
+Multiple containers are executed under a single supervisor, demonstrating concurrent execution and container management.
+
+![Task 1](screenshots/TASK_1.png)
 
 ---
 
-# Demo with Screenshots
+### Task 2 – Metadata Tracking
+The engine ps command displays container metadata including ID, PID, state, and memory limits.
 
-## Task 1 – Multi-Container Supervision 
-Multiple containers are executed under a single supervisor, demonstrating concurrent execution and container management.
+![Task 2](screenshots/TASK_2.png)
 
-## Task 2 – Metadata Tracking 
-The `engine ps` command displays container metadata including ID, PID, state, and memory limits.
+---
 
-## Task 3 – Bounded-Buffer Logging 
+### Task 3 – Bounded-Buffer Logging
 Container output is captured using pipes and stored in log files via a bounded-buffer logging system.
 
-## Task 4 – CLI and IPC 
+![Task 3](screenshots/TASK_3.png)
+
+---
+
+### Task 4 – CLI and IPC
 CLI commands communicate with the supervisor via IPC, demonstrating control-plane interaction.
 
-## Task 5 – Soft Limit Monitoring 
+![Task 4](screenshots/TASK_4.png)
+
+---
+
+### Task 5 – Soft Limit Monitoring
 Kernel logs show container registration and configured soft/hard limits, demonstrating monitoring functionality.
 
-## Task 6 – Hard Limit Enforcement
+![Task 5](screenshots/TASK_5.png)
+
+---
+
+### Task 6 – Hard Limit Enforcement
 The kernel module tracks containers and applies memory limits. The logs demonstrate the enforcement pipeline.
 
-## Task 7 – Scheduling Experiment
+![Task 6](screenshots/TASK_6.png)
+
+---
+
+### Task 7 – Scheduling Experiment
 Multiple containers are executed simultaneously to observe scheduling behavior and CPU sharing.
 
-## Task 8 – Clean Teardown
+![Task 7](screenshots/TASK_7.png)
+
+---
+
+### Task 8 – Clean Teardown
 Supervisor exits cleanly and no container processes remain, demonstrating proper cleanup.
+
+![Task 8](screenshots/TASK_8.png)
 
 # 7. Engineering Analysis
 
