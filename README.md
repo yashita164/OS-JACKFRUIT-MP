@@ -28,7 +28,6 @@
 **Contributions:**  
 
 - **Task 2 – Metadata Tracking**  
-  Implemented container metadata tracking and developed the `engine ps` command.  
 
 - **Task 3 – Bounded-Buffer Logging**  
 
