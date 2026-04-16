@@ -13,17 +13,13 @@
 
 **Contributions:**  
 
-- **Task 1 – Multi-Container Supervision**  
-  Implemented execution of multiple containers under a single supervisor process and ensured correct lifecycle handling.  
+- **Task 1 – Multi-Container Supervision**    
 
 - **Task 4 – CLI and IPC Mechanism**  
-  Developed CLI commands and implemented communication between CLI and supervisor using UNIX domain sockets.  
 
 - **Task 6 – Hard Limit Enforcement**  
-  Integrated kernel monitoring with the runtime and demonstrated memory limit tracking through kernel logs.  
 
-- **Task 7 – Scheduling Experiment**  
-  Designed and executed experiments with multiple containers to analyze Linux scheduling behavior and CPU sharing.  
+- **Task 7 – Scheduling Experiment**   
 
 ---
 
@@ -35,18 +31,150 @@
   Implemented container metadata tracking and developed the `engine ps` command.  
 
 - **Task 3 – Bounded-Buffer Logging**  
-  Designed a logging pipeline using pipes and a producer-consumer model.  
 
 - **Task 5 – Soft Limit Monitoring**  
-  Implemented kernel module functionality for monitoring container memory usage.
 
 - **Task 8 – Resource Cleanup**  
-  Ensured proper cleanup of processes, threads, and kernel structures, preventing zombie processes and resource leaks.  
+.  
   ## 2. Overview  
 
 This project implements a lightweight container runtime inspired by modern container systems. It enables the creation, execution, and management of isolated containers using Linux system calls and namespaces.  
 
 The system integrates both user-space and kernel-space components to demonstrate core operating system concepts such as process isolation, inter-process communication, memory monitoring, and scheduling behavior.  
+
+## Task 1 – Multi-Container Supervision
+Task 1 implements multi-container supervision by maintaining a **linked list of container records** in the supervisor.
+
+- Each record stores:
+  - PID
+  - State
+  - Memory limits
+  - Log path  
+
+Containers are created using `clone` with **PID, UTS, and mount namespaces**, providing process and environment isolation.
+
+- The supervisor continuously manages the container lifecycle through an **event loop**, handling:
+  - Creation  
+  - Execution  
+  - Termination  
+
+In the kernel module, a corresponding **`monitored_entry` structure** stores PID and memory limits, enabling efficient resource tracking.
+
+---
+
+## Task 2 – Metadata Tracking
+Task 2 implements container metadata management using structured records.
+
+- Metadata includes:
+  - Container ID  
+  - PID  
+  - State  
+  - Start time  
+  - Resource limits  
+
+- Stored in a **linked list**
+- Accessed using synchronization mechanisms to ensure **thread safety**
+
+The supervisor uses this metadata to implement commands like `ps`, allowing users to view container states and configurations.
+
+---
+
+## Task 3 – Bounded-Buffer Logging
+Task 3 implements logging using a **producer-consumer model with a bounded buffer**.
+
+- Container output is captured using **pipes**
+- Producer threads:
+  - Read log data  
+  - Push into shared buffer  
+
+- Consumer thread:
+  - Retrieves log entries  
+  - Writes to container-specific log files  
+
+Synchronization is handled using:
+
+- **Mutexes**
+- **Condition variables**
+
+This prevents race conditions and ensures efficient thread communication.
+
+---
+
+## Task 4 – CLI and IPC Mechanism
+Task 4 implements communication between the CLI and supervisor using **UNIX domain sockets**.
+
+- CLI:
+  - Constructs structured requests (`start`, `stop`, `ps`, `logs`)  
+  - Sends to supervisor  
+
+- Supervisor:
+  - Listens on socket  
+  - Accepts connections  
+  - Processes requests  
+  - Sends structured responses  
+
+This enables efficient and reliable **inter-process communication (IPC)**.
+
+---
+
+## Task 5 – Soft Limit Monitoring
+Task 5 implements **soft memory limit monitoring** in the kernel module.
+
+- Memory usage is tracked using **RSS (Resident Set Size)**
+- If soft limit is exceeded:
+  - A warning is logged using `printk`
+  - Container continues execution  
+
+A flag ensures the warning is issued **only once per container**, preventing excessive logging.
+
+---
+
+## Task 6 – Hard Limit Enforcement
+Task 6 enforces strict memory limits at the kernel level.
+
+- Supervisor registers:
+  - PID  
+  - Memory limits  
+  using an `ioctl` call  
+
+- Kernel module:
+  - Periodically checks memory usage  
+  - If hard limit exceeded:
+    - Sends **`SIGKILL`**
+    - Terminates container immediately  
+
+- Container is removed from monitoring list  
+
+This ensures **strict resource control**.
+
+---
+
+## Task 7 – Scheduling Experiment
+Task 7 analyzes Linux scheduling behavior.
+
+- Containers run **CPU-intensive workloads**
+- Priority adjusted using the `nice` system call  
+
+Observations using tools like `top` show:
+
+- Lower nice values → **More CPU time**  
+- Higher nice values → **Less CPU time**  
+
+Demonstrates behavior of the **Completely Fair Scheduler (CFS)** and how it balances fairness with priority.
+
+---
+
+## Task 8 – Resource Cleanup
+Task 8 ensures proper cleanup of system resources.
+
+- Supervisor:
+  - Uses `waitpid` to reap child processes (prevents zombies)  
+  - Unregisters containers from kernel module  
+  - Closes file descriptors (sockets, pipes)  
+  - Frees dynamically allocated memory  
+
+- Kernel module:
+  - Removes and frees all monitored entries during unload  
 
 ---
 
